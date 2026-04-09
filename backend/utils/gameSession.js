@@ -1,7 +1,7 @@
-const { players, Player } = require("./Player");
-const question = require("./Question");
+const { players, Player } = require("./player");
+const question = require("./question");
 const { formatResponse } = require("./responseFormatter");
-const Timer = require("./Timer");
+const Timer = require("./timer");
 
 class GameSession {
   constructor({ io }) {

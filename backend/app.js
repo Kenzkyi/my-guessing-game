@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 
@@ -12,6 +13,8 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
+
+const PORT = process.env.PORT || 3012;
 
 const GameSession = require("./utils/gameSession");
 
@@ -54,6 +57,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3012, () => {
-  console.log("listening on *:3012");
+server.listen(PORT, () => {
+  console.log(`listening on *:${PORT}`);
 });

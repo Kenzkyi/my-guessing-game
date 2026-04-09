@@ -24,8 +24,9 @@ export const GameProvider = ({ children }) => {
       return sessionId;
     };
 
-    return io(process.env.BACKEND_URL || "http://localhost:3012", {
+    return io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3012", {
       auth: { sessionId: getSessionId() },
+      reconnectionAttempts: 5, // Try to reconnect up to 5 times
     });
   }, []);
 

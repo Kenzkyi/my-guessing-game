@@ -6,7 +6,7 @@ export default function ResultsView() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen text-center p-6">
-      <h1 className="text-4xl mb-4">
+      <h1 className="text-4xl mb-4 text-gray-600">
         {gameState.winner
           ? gameState.winner.id === me.id
             ? "You have won"

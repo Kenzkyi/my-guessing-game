@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
     player.socket = socket;
 
     // Send them their current data
-    const { socket: _, ...data } = playerResponse.data; // Exclude socket from response
+    const { socket: _, ...data } = player; // Exclude socket from response
     socket.emit("init_player", data);
   } else {
     socket.emit("init_player", null); // No player data, treat as new connection

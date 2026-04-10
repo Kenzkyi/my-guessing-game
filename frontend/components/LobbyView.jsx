@@ -21,11 +21,11 @@ export default function LobbyView() {
               key={p.id}
               className="flex justify-between items-center bg-gray-50 p-2 rounded"
             >
-              <span>
+              <span className="text-gray-500">
                 {p.name} {p.id === me.id && "(You)"}
               </span>
               {p.id === gameState.gameMaster && (
-                <span className="text-xl">👑</span>
+                <span className="text-xl text-gray-500">👑</span>
               )}
             </li>
           ))}

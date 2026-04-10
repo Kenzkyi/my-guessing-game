@@ -40,7 +40,7 @@ export default function ActiveChat() {
     <>
       <div className="flex flex-col h-screen max-w-2xl mx-auto bg-gray-50 shadow-lg border-x">
         {/* 1. Header: Question & Timer */}
-        <div className="p-4 border-b flex justify-between items-center bg-blue-600 text-white shadow-md">
+        <div className="p-4 border-b flex justify-between items-center bg-blue-600 text-white shadow-md sticky top-0 w-full z-10">
           <div className="flex-1">
             <p className="text-[10px] uppercase tracking-widest opacity-80">
               Current Question
@@ -107,7 +107,7 @@ export default function ActiveChat() {
                   onChange={(e) => setText(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder="Type your guess here..."
-                  className="flex-1 p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition-colors"
+                  className="flex-1 p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition-colors placeholder:text-gray-300"
                   autoFocus
                 />
                 <button

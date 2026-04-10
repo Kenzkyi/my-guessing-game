@@ -1,13 +1,36 @@
-let audioCtx = null;
+// utils/audioManager.js
+
+let audioContext = null; // Hold the instance here
 const bufferCache = {};
 
 export const initAudio = async () => {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // 1. Check if we are in a browser environment
+  if (typeof window === "undefined") return null;
+
+  // 2. If it doesn't exist yet, create it
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      console.error("Web Audio API is not supported in this browser");
+      return null;
+    }
+    audioContext = new AudioContextClass();
   }
-  // Essential: Resume the context on a user gesture
-  if (audioCtx.state === "suspended") {
-    await audioCtx.resume();
+
+  // 3. CRITICAL: You must return the context!
+  return audioContext;
+};
+
+export const resumeAudio = async () => {
+  const ctx = await initAudio();
+
+  // 4. Guard against null (if initAudio failed or ran on server)
+  if (!ctx) return;
+  console.log(ctx);
+
+  if (ctx.state === "suspended") {
+    await ctx.resume();
+    console.log("AudioContext resumed successfully!");
   }
 };
 
@@ -15,24 +38,24 @@ export const loadSound = async (name, url) => {
   try {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
-    bufferCache[name] = await audioCtx.decodeAudioData(arrayBuffer);
+    bufferCache[name] = await audioContext.decodeAudioData(arrayBuffer);
   } catch (error) {
     console.error(error);
   }
 };
 
 export const playSound = (name, durationLimit = null) => {
-  if (!audioCtx || !bufferCache[name]) return;
+  if (!audioContext || !bufferCache[name]) return;
 
-  const source = audioCtx.createBufferSource();
-  const gainNode = audioCtx.createGain(); // Create a volume controller
+  const source = audioContext.createBufferSource();
+  const gainNode = audioContext.createGain(); // Create a volume controller
 
   source.buffer = bufferCache[name];
 
   source.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
+  gainNode.connect(audioContext.destination);
 
-  const startTime = audioCtx.currentTime;
+  const startTime = audioContext.currentTime;
   source.start(startTime);
 
   if (durationLimit) {

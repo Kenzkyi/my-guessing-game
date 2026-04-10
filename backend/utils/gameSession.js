@@ -215,6 +215,13 @@ class GameSession {
   }
 
   leaveGame(id) {
+    if (players.getPlayers().length === 1) {
+      this.reset();
+      this.gameMaster = null;
+      this.players.clearPlayers();
+      this.socket.emit("sync_state", this.getGameState().data);
+      return;
+    }
     if (id === this.gameMaster && this.players.getPlayers().length > 1) {
       this.declinedGMs.clear();
       this.assignGameMaster();

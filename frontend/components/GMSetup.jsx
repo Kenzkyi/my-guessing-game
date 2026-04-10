@@ -18,12 +18,12 @@ export default function GMSetup() {
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           placeholder="Enter Question"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-black placeholder:text-gray-300 border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
           onChange={(e) => setQ(e.target.value)}
         />
         <input
           placeholder="Enter Answer"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-black placeholder:text-gray-300 border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
           onChange={(e) => setA(e.target.value)}
         />
         <button

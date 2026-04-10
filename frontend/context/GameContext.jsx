@@ -1,5 +1,10 @@
 "use client";
-import { initAudio, loadSound, playSound } from "@/utils/audioManager";
+import {
+  initAudio,
+  loadSound,
+  playSound,
+  resumeAudio,
+} from "@/utils/audioManager";
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
@@ -27,11 +32,21 @@ export const GameProvider = ({ children }) => {
     return io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3012", {
       auth: { sessionId: getSessionId() },
       reconnectionAttempts: 5, // Try to reconnect up to 5 times
+      transports: ["websocket", "polling"], // Prioritize WebSocket but allow polling as fallback
     });
   }, []);
 
   useEffect(() => {
-    socket.on("connect", () => console.log("Connected"));
+    socket.on("connect", () => {
+      console.log("Connected");
+      const engine = socket.io.engine;
+      console.log(engine.transport.name); // in most cases, prints "polling"
+
+      engine.once("upgrade", () => {
+        // called when the transport is upgraded (i.e. from HTTP long-polling to WebSocket)
+        console.log(engine.transport.name); // in most cases, prints "websocket"
+      });
+    });
 
     socket.on("sync_state", (state) => {
       setGameState(state);
@@ -77,19 +92,20 @@ export const GameProvider = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      await initAudio();
-      await loadSound(
-        "tick",
-        "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
-      );
-      await loadSound(
-        "success",
-        "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg",
-      );
-      await loadSound(
-        "alert",
-        "https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg",
-      );
+      try {
+        await initAudio();
+        await loadSound("tick", "/tick.mp3");
+        await loadSound(
+          "success",
+          "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg",
+        );
+        await loadSound(
+          "alert",
+          "https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg",
+        );
+      } catch (error) {
+        console.error(error);
+      }
     })();
   }, []);
 
@@ -115,7 +131,15 @@ export const GameProvider = ({ children }) => {
   }, [gameState?.winner, gameState?.pendingGM, me?.id]);
 
   const sendGuess = (text) => socket.emit("submit_guess", text);
-  const joinGame = (name) => socket.emit("join_game", name);
+  const joinGame = async (name) => {
+    // 1. Unlock audio for the whole session
+    try {
+      await resumeAudio();
+    } catch (err) {
+      console.warn("Audio unlock failed", err);
+    }
+    socket.emit("join_game", name);
+  };
   const startSession = (q, a) => socket.emit("start_session", { q, a });
 
   const leaveGame = () => {

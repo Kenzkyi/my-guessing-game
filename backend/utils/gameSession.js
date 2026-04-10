@@ -155,30 +155,29 @@ class GameSession {
     const allPlayers = this.players.getPlayers();
     if (allPlayers.length === 0) return;
 
-    // Filter players who haven't declined yet
-    let available = allPlayers.filter(
-      (p) => !this.declinedGMs.has(p.id) && p.id !== this.gameMaster,
-    );
+    // 1. Find everyone who hasn't been asked/declined yet
+    // We exclude the current GM only if there's someone else available
+    let available = allPlayers.filter((p) => !this.declinedGMs.has(p.id));
 
-    // If everyone has declined, close the game
+    if (allPlayers.length > 1) {
+      available = available.filter((p) => p.id !== this.gameMaster);
+    }
+
+    // 2. No one left to ask
     if (available.length === 0) {
-      this.status = "CLOSED";
-      this.pendingGM = null;
-      this.reason =
-        "All players have declined to be Game Master. Game session is now closed.";
-      this.socket.emit("sync_state", this.getGameState().data);
-      setTimeout(() => {
-        this.reset();
-        this.gameMaster = null;
-        this.players.clearPlayers();
-        this.socket.emit("sync_state", this.getGameState().data);
-      }, 5000);
+      // Instead of CLOSING, maybe just reset the declined list and pick someone?
+      // Or keep your CLOSED logic if that's the intended game design.
+      this.handleGameClosure();
       return;
     }
 
+    // 3. Selection
     const chosen = available[Math.floor(Math.random() * available.length)];
     this.pendingGM = chosen.id;
-    this.declinedGMs.add(chosen.id);
+
+    // Note: I moved .add() to the onGMDecision 'false' branch
+    // to keep this function "pure" for selection only.
+
     this.socket.emit("sync_state", this.getGameState().data);
   }
 
@@ -187,26 +186,26 @@ class GameSession {
       socket.emit("gm_decision_error", "You are not the pending Game Master");
       return;
     }
+
     if (accept) {
       this.reset();
       this.gameMaster = playerId;
-      this.declinedGMs.clear();
+      this.declinedGMs.clear(); // Fresh start for the new GM's round
       this.socket.emit("sync_state", this.getGameState().data);
     } else {
-      if (this.declinedGMs.size === this.players.getPlayers().length) {
-        this.status = "CLOSED";
-        this.pendingGM = null;
-        this.reason =
-          "All players have declined to be Game Master. Game session is now closed.";
-        this.socket.emit("sync_state", this.getGameState().data);
-        setTimeout(() => {
-          this.reset();
-          this.gameMaster = null;
-          this.players.clearPlayers();
-          this.socket.emit("sync_state", this.getGameState().data);
-        }, 5000);
+      // 1. Add them to the declined list first
+      this.declinedGMs.add(playerId);
+
+      // 2. NOW check if everyone has declined
+      // We compare against the total number of players currently in the session
+      const totalPlayers = this.players.getPlayers().length;
+
+      if (this.declinedGMs.size >= totalPlayers) {
+        this.handleGameClosure();
         return;
       }
+
+      // 3. Otherwise, find the next candidate
       this.assignGameMaster();
     }
   }
@@ -216,36 +215,47 @@ class GameSession {
   }
 
   leaveGame(id) {
-    if (players.getPlayers().length === 1) {
+    // 1. Remove the player first so logic calculations are accurate
+    this.players.removePlayer(id);
+    const currentPlayers = this.players.getPlayers();
+
+    // 2. Check if room is empty
+    if (currentPlayers.length === 0) {
+      this.handleGameClosure("Room is empty.");
+      return;
+    }
+
+    // 3. If the person who left was the Pending GM, pick a new one
+    if (id === this.pendingGM) {
+      this.assignGameMaster();
+    }
+
+    // 4. If the person who left was the active Game Master
+    if (id === this.gameMaster) {
+      this.declinedGMs.clear();
+      // Reset gameMaster so the pick logic knows the seat is vacant
+      this.gameMaster = null;
+      this.assignGameMaster();
+      this.emitGameEvent({
+        message: "Game Master has left, assigning new Game Master...",
+        eventName: "left_game_master",
+      });
+    }
+
+    // 5. Always sync the final count to everyone
+    this.socket.emit("sync_state", this.getGameState().data);
+  }
+
+  handleGameClosure(reason) {
+    this.status = "CLOSED";
+    this.reason = reason || "All players declined to be Game Master.";
+    this.socket.emit("sync_state", this.getGameState().data);
+    setTimeout(() => {
       this.reset();
       this.gameMaster = null;
       this.players.clearPlayers();
       this.socket.emit("sync_state", this.getGameState().data);
-      return;
-    }
-    if (id === this.gameMaster && this.players.getPlayers().length > 1) {
-      this.declinedGMs.clear();
-      this.assignGameMaster();
-      this.emitGameEvent({
-        message: "Game Master has left, Assigning new Game Master...",
-        eventName: "left_game_master",
-      });
-    } else if (
-      id === this.gameMaster &&
-      this.players.getPlayers().length === 1
-    ) {
-      this.status = "CLOSED";
-      this.reason = "Game Master has left and no other players are available.";
-      this.socket.emit("sync_state", this.getGameState().data);
-      setTimeout(() => {
-        this.reset();
-        this.gameMaster = null;
-        this.players.clearPlayers();
-        this.socket.emit("sync_state", this.getGameState().data);
-      }, 5000);
-    }
-    this.players.removePlayer(id);
-    this.socket.emit("sync_state", this.getGameState().data);
+    }, 5000);
   }
 
   reset() {

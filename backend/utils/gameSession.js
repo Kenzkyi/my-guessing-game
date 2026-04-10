@@ -93,6 +93,7 @@ class GameSession {
       "init_player",
       this.players.getPlayer(socket.handshake.auth.sessionId).data,
     );
+    this.declinedGMs.clear();
     this.timer.start();
 
     this.timer.onTimeExpired(() => {

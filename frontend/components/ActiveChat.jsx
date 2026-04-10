@@ -44,7 +44,7 @@ export default function ActiveChat() {
     <>
       <div className="w-full md:w-fit md:min-w-1/3 flex flex-col h-screen max-w-2xl mx-auto bg-gray-50 shadow-lg border-x">
         {/* 1. Header: Question & Timer */}
-        <div className="p-4 border-b sticky flex justify-between items-center bg-blue-600 text-white shadow-md top-0 w-full z-10">
+        <div className="p-4 border-b flex justify-between items-center bg-blue-600 text-white shadow-md w-full z-10">
           <div className="flex-1">
             <p className="text-[10px] uppercase tracking-widest opacity-80">
               Current Question

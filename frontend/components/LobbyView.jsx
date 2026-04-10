@@ -9,7 +9,7 @@ export default function LobbyView() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 text-center">
-      <h2 className="text-2xl font-bold mb-4">Game Lobby 🏠</h2>
+      <h2 className="text-2xl font-bold mb-4 text-gray-500">Game Lobby 🏠</h2>
 
       <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h3 className="font-semibold text-gray-500 uppercase text-xs mb-4">

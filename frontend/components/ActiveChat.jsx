@@ -15,7 +15,7 @@ export default function ActiveChat() {
 
   useEffect(() => {
     if (gameState.timeLeft <= 10 && gameState.timeLeft > 0) {
-      playSound("tick", 1);
+      playSound("tick");
     }
   }, [gameState.timeLeft]);
 
@@ -38,9 +38,9 @@ export default function ActiveChat() {
 
   return (
     <>
-      <div className="flex flex-col h-screen max-w-2xl mx-auto bg-gray-50 shadow-lg border-x">
+      <div className="w-full md:w-fit md:min-w-1/3 flex flex-col h-screen max-w-2xl mx-auto bg-gray-50 shadow-lg border-x">
         {/* 1. Header: Question & Timer */}
-        <div className="p-4 border-b flex justify-between items-center bg-blue-600 text-white shadow-md sticky top-0 w-full z-10">
+        <div className="p-4 border-b fixed flex justify-between items-center bg-blue-600 text-white shadow-md md:sticky top-0 w-full z-10">
           <div className="flex-1">
             <p className="text-[10px] uppercase tracking-widest opacity-80">
               Current Question
@@ -107,7 +107,7 @@ export default function ActiveChat() {
                   onChange={(e) => setText(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder="Type your guess here..."
-                  className="flex-1 p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition-colors placeholder:text-gray-300"
+                  className="flex-1 p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition-colors placeholder:text-gray-300 text-black"
                   autoFocus
                 />
                 <button

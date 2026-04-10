@@ -95,14 +95,8 @@ export const GameProvider = ({ children }) => {
       try {
         await initAudio();
         await loadSound("tick", "/tick.mp3");
-        await loadSound(
-          "success",
-          "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg",
-        );
-        await loadSound(
-          "alert",
-          "https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg",
-        );
+        await loadSound("success", "/success.mp3");
+        await loadSound("alert", "/alert.mp3");
       } catch (error) {
         console.error(error);
       }

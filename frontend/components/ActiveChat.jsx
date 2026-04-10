@@ -14,7 +14,11 @@ export default function ActiveChat() {
   const canGuess = !isGM && me.attempts > 0 && gameState.status === "PLAYING";
 
   useEffect(() => {
-    if (gameState.timeLeft <= 10 && gameState.timeLeft > 0) {
+    if (
+      gameState.timeLeft <= 10 &&
+      gameState.timeLeft > 0 &&
+      gameState.status === "PLAYING"
+    ) {
       playSound("tick");
     }
   }, [gameState.timeLeft]);
@@ -38,9 +42,9 @@ export default function ActiveChat() {
 
   return (
     <>
-      <div className="w-full md:w-fit md:min-w-1/3 flex flex-col h-screen max-w-2xl mx-auto bg-gray-50 shadow-lg border-x">
+      <div className="w-full md:w-fit md:min-w-1/3 flex flex-col h-screen max-w-2xl mx-auto bg-gray-50 shadow-lg border-x relative">
         {/* 1. Header: Question & Timer */}
-        <div className="p-4 border-b fixed flex justify-between items-center bg-blue-600 text-white shadow-md md:sticky top-0 w-full z-10">
+        <div className="p-4 border-b absolute flex justify-between items-center bg-blue-600 text-white shadow-md md:sticky top-0 w-full z-10">
           <div className="flex-1">
             <p className="text-[10px] uppercase tracking-widest opacity-80">
               Current Question

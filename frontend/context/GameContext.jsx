@@ -73,7 +73,9 @@ export const GameProvider = ({ children }) => {
     socket.on("gm_decision_error", (message) => toast.error(message));
 
     socket.on("left_game_master", (message) => {
-      toast.info(message);
+      if (me) {
+        toast.info(message);
+      }
     });
 
     // 3. CLEANUP: This is vital to prevent memory leaks and duplicate toasts

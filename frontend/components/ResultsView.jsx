@@ -15,7 +15,7 @@ export default function ResultsView() {
       </h1>
       {gameState.winner && (
         <div className="bg-yellow-100 p-6 rounded-2xl mb-4">
-          <p className="text-lg font-bold">
+          <p className="text-lg font-bold text-black">
             {gameState.winner?.id === me.id
               ? "Congratulations, you guessed it right! 🥳"
               : `${gameState.winner.name} won 10 points!`}

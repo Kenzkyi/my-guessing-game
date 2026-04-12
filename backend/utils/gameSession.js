@@ -159,7 +159,7 @@ class GameSession {
     // We exclude the current GM only if there's someone else available
     let available = allPlayers.filter((p) => !this.declinedGMs.has(p.id));
 
-    if (allPlayers.length > 1) {
+    if (allPlayers.length > 2) {
       available = available.filter((p) => p.id !== this.gameMaster);
     }
 

@@ -21,10 +21,10 @@ export const GameProvider = ({ children }) => {
   const socket = useMemo(() => {
     const getSessionId = () => {
       if (typeof window === "undefined") return null;
-      let sessionId = sessionStorage.getItem("game_session_id");
+      let sessionId = localStorage.getItem("game_session_id");
       if (!sessionId) {
         sessionId = crypto.randomUUID();
-        sessionStorage.setItem("game_session_id", sessionId);
+        localStorage.setItem("game_session_id", sessionId);
       }
       return sessionId;
     };
@@ -142,7 +142,7 @@ export const GameProvider = ({ children }) => {
     socket.emit("leave_game"); // Backend: Remove player from array/map
     setMe(null); // Frontend: Reset local state
     socket.disconnect(); // Disconnect socket to prevent lingering connections
-    sessionStorage.removeItem("game_session_id");
+    localStorage.removeItem("game_session_id");
     window.location.reload(); // Hard reset to ensure fresh socket connection
   };
 

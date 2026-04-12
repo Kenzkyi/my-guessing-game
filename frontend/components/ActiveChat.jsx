@@ -14,6 +14,9 @@ export default function ActiveChat() {
   const canGuess = !isGM && me.attempts > 0 && gameState.status === "PLAYING";
 
   useEffect(() => {
+    if (!me) {
+      return;
+    }
     if (
       gameState.timeLeft <= 10 &&
       gameState.timeLeft > 0 &&

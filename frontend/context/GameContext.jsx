@@ -112,7 +112,7 @@ export const GameProvider = ({ children }) => {
   }, [gameState?.status]);
 
   useEffect(() => {
-    if (!gameState) return;
+    if (!gameState || !me) return;
 
     // Winner Sound
     if (gameState.winner && !gameState.pendingGM && !hasPlayedSound) {

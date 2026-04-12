@@ -9,12 +9,15 @@ export default function LobbyView() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 text-center">
-      <h2 className="text-2xl font-bold mb-4 text-gray-500">Game Lobby 🏠</h2>
+      <div className="flex flex-col items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Game Lobby 🏠</h2>
+        {/* ADDED: Player Count Badge */}
+        <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold flex items-center gap-1">
+          👥 {gameState.players.length} Players Connected
+        </div>
+      </div>
 
       <div className="bg-white rounded-xl shadow p-6 mb-6">
-        <h3 className="font-semibold text-gray-500 uppercase text-xs mb-4">
-          Players Connected
-        </h3>
         <ul className="space-y-2">
           {gameState.players.map((p) => (
             <li

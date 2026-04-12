@@ -23,16 +23,30 @@ const gameSession = new GameSession({ io });
 io.on("connection", (socket) => {
   const sessionId = socket.handshake.auth.sessionId;
 
+  gameSession.updateActivity(sessionId);
+
   const player = gameSession.players.players.find((p) => p.id === sessionId);
   if (player) {
     player.socket = socket;
 
     // Send them their current data
-    const { socket: _, ...data } = player; // Exclude socket from response
+    const { socket: _, ...data } = player;
     socket.emit("init_player", data);
   } else {
     socket.emit("init_player", null); // No player data, treat as new connection
   }
+
+  socket.on("disconnect", () => {
+    setTimeout(() => {
+      const player = gameSession.players.players.find(
+        (p) => p.id === sessionId,
+      );
+
+      if (player && player.socket && !player.socket.connected) {
+        gameSession.leaveGame(sessionId);
+      }
+    }, 30000);
+  });
 
   io.emit("sync_state", gameSession.getGameState().data);
 

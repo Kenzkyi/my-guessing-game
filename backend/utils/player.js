@@ -12,6 +12,7 @@ class Player {
     this.spectating = false;
     this.activeInRound = true;
     this.socket = null;
+    this.updatedAt = Date.now();
   }
 
   setActivePlayer(arg0) {

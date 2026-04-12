@@ -18,6 +18,7 @@ class GameSession {
     this.timeLeft = this.timer.secondsLeft();
     this.reason = null;
     this.declinedGMs = new Set();
+    this.startCleanupInterval();
   }
 
   getGameState(timeLeft = this.timeLeft) {
@@ -61,7 +62,7 @@ class GameSession {
         response = new Player().setActivePlayer({ id, name, socket });
       }
     }
-
+    this.updateActivity(id);
     if (!response.ok) {
       socket.emit(
         "join_error",
@@ -146,7 +147,7 @@ class GameSession {
     } else {
       this.players.reduceAttempt(playerId);
     }
-
+    this.updateActivity(playerId);
     this.socket.emit("sync_state", this.getGameState().data);
     socket.emit("init_player", this.players.getPlayer(playerId).data);
   }
@@ -199,6 +200,7 @@ class GameSession {
       // 2. NOW check if everyone has declined
       // We compare against the total number of players currently in the session
       const totalPlayers = this.players.getPlayers().length;
+      this.updateActivity(playerId);
 
       if (this.declinedGMs.size >= totalPlayers) {
         this.handleGameClosure();
@@ -212,6 +214,32 @@ class GameSession {
 
   emitGameEvent({ message, eventName }) {
     this.socket.emit(eventName, message);
+  }
+
+  updateActivity(id) {
+    const player = this.players.players.find((p) => p.id === id);
+    if (player) {
+      player.lastSeen = Date.now();
+    }
+  }
+
+  startCleanupInterval() {
+    setInterval(() => {
+      const now = Date.now();
+      const idleLimit = 15 * 60 * 1000; // 15 mins in ms
+
+      this.players.players.forEach((player) => {
+        // Logic: If they haven't moved in 15 mins OR their socket is disconnected
+        const isIdle = now - player.lastSeen > idleLimit;
+        const isSocketDead = player.socket && !player.socket.connected;
+
+        if (isIdle || isSocketDead) {
+          console.log(`Cleaning up player: ${player.name} (Idle: ${isIdle})`);
+          player.socket.disconnect();
+          this.leaveGame(player.id);
+        }
+      });
+    }, 60000); // Check every minute
   }
 
   leaveGame(id) {

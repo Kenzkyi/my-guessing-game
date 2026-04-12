@@ -52,6 +52,9 @@ export default function ActiveChat() {
             <p className="text-[10px] uppercase tracking-widest opacity-80">
               Current Question
             </p>
+            <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1">
+              👥 {gameState.players.length}
+            </span>
             <h2 className="font-bold text-lg leading-tight">
               {gameState.question}
             </h2>
